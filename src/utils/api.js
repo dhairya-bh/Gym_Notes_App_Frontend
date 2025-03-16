@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const API_URL =
-  process.env.NODE_ENV === "production" ? "/api" : "http://localhost:5000/api";
+  process.env.NODE_ENV === "production"
+    ? "https://gymnotesappbackend-production.up.railway.app/api"
+    : "http://localhost:5000/api";
 
 // Exercise API calls
 export const getExercises = async () => {
