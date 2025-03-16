@@ -371,6 +371,7 @@
   box-shadow: none !important; /* Remove any shadow */
 }
 
+
 /* Add this to your CSS file or a <style> tag */
 @media (max-width: 768px) {
   .rbc-calendar {

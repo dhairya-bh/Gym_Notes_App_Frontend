@@ -8,6 +8,7 @@ import isBefore from "date-fns/isBefore";
 import isToday from "date-fns/isToday";
 import startOfDay from "date-fns/startOfDay";
 import isSameMonth from "date-fns/isSameMonth";
+import isSameDay from "date-fns/isSameDay"; // Add this import
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { getExercises } from "../utils/api";
 
@@ -23,7 +24,6 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-// Custom hook to track window size
 const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -45,15 +45,17 @@ const useWindowSize = () => {
   return windowSize;
 };
 
-// Custom Event Component
 const CustomEvent = ({ event }) => {
   const { width } = useWindowSize();
+
+  // Determine if the event has 0 exercises
+  const hasZeroExercises = event.title === "0";
 
   return (
     <div
       style={{
-        backgroundColor: "#1890ff",
-        color: "#ffffff",
+        backgroundColor: hasZeroExercises ? "#cccccc" : "#1890ff", // Gray for 0, blue otherwise
+        color: hasZeroExercises ? "#555555" : "#ffffff", // Darker text for gray, white for blue
         padding: "2px 6px",
         borderRadius: "4px",
         display: "inline-block",
@@ -67,7 +69,6 @@ const CustomEvent = ({ event }) => {
   );
 };
 
-// Custom Toolbar Component
 const CustomToolbar = (toolbar) => {
   const { width } = useWindowSize();
 
@@ -138,59 +139,94 @@ const CustomToolbar = (toolbar) => {
   );
 };
 
-// Main Calendar Component
 const GymCalendar = ({ onDateSelect }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const { width, height } = useWindowSize();
 
+  const fetchWorkouts = async (date) => {
+    try {
+      setLoading(true);
+      const exercises = await getExercises();
+      const exercisesByDate = {};
+
+      exercises.forEach((exercise) => {
+        const dateKey = exercise.date.split("T")[0];
+        if (!exercisesByDate[dateKey]) {
+          exercisesByDate[dateKey] = [];
+        }
+        exercisesByDate[dateKey].push(exercise);
+      });
+
+      // Generate all dates in the specified month
+      const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+      const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      const allDatesInMonth = [];
+      for (let d = startOfMonth; d <= endOfMonth; d.setDate(d.getDate() + 1)) {
+        allDatesInMonth.push(new Date(d));
+      }
+
+      const calendarEvents = allDatesInMonth.map((date) => {
+        const dateKey = format(date, "yyyy-MM-dd");
+        const exercises = exercisesByDate[dateKey] || [];
+        const eventDate = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate(),
+          12,
+          0,
+          0
+        );
+
+        return {
+          title: `${exercises.length}`,
+          start: eventDate,
+          end: eventDate,
+          allDay: true,
+          resource: exercises,
+        };
+      });
+
+      setEvents(calendarEvents);
+    } catch (error) {
+      console.error("Error fetching workouts for calendar:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchWorkouts = async () => {
-      try {
-        setLoading(true);
-        const exercises = await getExercises();
+    fetchWorkouts(currentDate); // Fetch exercises for the initial month
+  }, []);
 
-        // Group exercises by date using UTC date
-        const exercisesByDate = {};
+  const handleNavigate = (newDate) => {
+    setCurrentDate(newDate);
+    fetchWorkouts(newDate); // Fetch exercises for the new month
+  };
 
-        exercises.forEach((exercise) => {
-          // Extract the date part from ISO string (YYYY-MM-DD)
-          const dateKey = exercise.date.split("T")[0];
-
-          if (!exercisesByDate[dateKey]) {
-            exercisesByDate[dateKey] = [];
-          }
-          exercisesByDate[dateKey].push(exercise);
-        });
-
-        // Create events for the calendar with correct dates
-        const calendarEvents = Object.keys(exercisesByDate).map((dateKey) => {
-          const exercises = exercisesByDate[dateKey];
-          const [year, month, monthDay] = dateKey.split("-").map(Number);
-
-          // Create dates at noon to avoid timezone issues
-          const eventDate = new Date(year, month - 1, monthDay, 12, 0, 0);
-
-          return {
-            title: `${exercises.length}${exercises.length > 1 ? "s" : ""}`,
-            start: eventDate,
-            end: eventDate,
-            allDay: true,
-            resource: exercises,
-          };
-        });
-
-        setEvents(calendarEvents);
-      } catch (error) {
-        console.error("Error fetching workouts for calendar:", error);
-      } finally {
-        setLoading(false);
+  useEffect(() => {
+    const handleTouchStart = (event) => {
+      const target = event.target;
+      if (
+        target.classList.contains("rbc-day-bg") ||
+        target.classList.contains("rbc-date-cell")
+      ) {
+        target.click();
       }
     };
 
-    fetchWorkouts();
-  }, []);
+    const calendarElement = document.querySelector(".rbc-calendar");
+    if (calendarElement) {
+      calendarElement.addEventListener("touchstart", handleTouchStart);
+    }
+
+    return () => {
+      if (calendarElement) {
+        calendarElement.removeEventListener("touchstart", handleTouchStart);
+      }
+    };
+  }, [currentDate]);
 
   const handleSelectEvent = (event) => {
     onDateSelect(event.start);
@@ -198,10 +234,6 @@ const GymCalendar = ({ onDateSelect }) => {
 
   const handleSelectSlot = (slotInfo) => {
     onDateSelect(slotInfo.start);
-  };
-
-  const handleNavigate = (newDate) => {
-    setCurrentDate(newDate);
   };
 
   const dayPropGetter = (date) => {
@@ -254,7 +286,7 @@ const GymCalendar = ({ onDateSelect }) => {
     return <div>Loading calendar...</div>;
   }
 
-  const calendarHeight = width <= 768 ? height - 100 : 600; // Use full height on mobile
+  const calendarHeight = width <= 768 ? height - 100 : 600;
 
   return (
     <div
@@ -265,6 +297,7 @@ const GymCalendar = ({ onDateSelect }) => {
       }}
     >
       <Calendar
+        key={currentDate.toISOString()} // Force remount on date change
         localizer={localizer}
         events={events}
         startAccessor="start"
