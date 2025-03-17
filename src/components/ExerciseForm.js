@@ -1,12 +1,46 @@
 // src/components/ExerciseForm.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createExercise } from "../utils/api";
+import { searchExercises } from "../data/exerciseLibrary";
 
 const ExerciseForm = ({ date, onExerciseAdded }) => {
   const [name, setName] = useState("");
   const [gifUrl, setGifUrl] = useState("");
   const [sets, setSets] = useState([{ reps: "", weight: "" }]);
   const [notes, setNotes] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchResultsRef = useRef(null);
+
+  // Handle search input changes
+  useEffect(() => {
+    if (searchQuery.length > 1) {
+      const results = searchExercises(searchQuery);
+      setSearchResults(results);
+      setShowResults(true);
+    } else {
+      setSearchResults([]);
+      setShowResults(false);
+    }
+  }, [searchQuery]);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchResultsRef.current &&
+        !searchResultsRef.current.contains(event.target)
+      ) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleAddSet = () => {
     setSets([...sets, { reps: "", weight: "" }]);
@@ -22,6 +56,13 @@ const ExerciseForm = ({ date, onExerciseAdded }) => {
     const newSets = [...sets];
     newSets[index][field] = value;
     setSets(newSets);
+  };
+
+  const handleExerciseSelect = (exercise) => {
+    setName(exercise.name);
+    setGifUrl(exercise.gifUrl);
+    setSearchQuery("");
+    setShowResults(false);
   };
 
   const handleSubmit = async (e) => {
@@ -60,6 +101,60 @@ const ExerciseForm = ({ date, onExerciseAdded }) => {
     <div className="exercise-form">
       <h3>Add New Exercise</h3>
       <form onSubmit={handleSubmit} className="form-container">
+        <div className="form-group position-relative">
+          <label htmlFor="exerciseSearch">Search Exercise</label>
+          <input
+            type="text"
+            id="exerciseSearch"
+            className="form-control"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for exercises..."
+          />
+
+          {showResults && searchResults.length > 0 && (
+            <div
+              ref={searchResultsRef}
+              className="search-results"
+              style={{
+                position: "absolute",
+                zIndex: 1000,
+                width: "100%",
+                maxHeight: "200px",
+                overflowY: "auto",
+                backgroundColor: "white",
+                border: "1px solid #ced4da",
+                borderRadius: "0.25rem",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              {searchResults.map((exercise) => (
+                <div
+                  key={exercise.id}
+                  className="search-result-item"
+                  onClick={() => handleExerciseSelect(exercise)}
+                  style={{
+                    padding: "10px",
+                    cursor: "pointer",
+                    borderBottom: "1px solid #eee",
+                  }}
+                  onMouseOver={(e) =>
+                    (e.target.style.backgroundColor = "#f8f9fa")
+                  }
+                  onMouseOut={(e) => (e.target.style.backgroundColor = "white")}
+                >
+                  <div>
+                    <strong>{exercise.name}</strong>
+                  </div>
+                  <div className="text-muted">
+                    Body part: {exercise.bodyPart}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="form-group">
           <label htmlFor="name">Exercise Name</label>
           <input
@@ -82,6 +177,20 @@ const ExerciseForm = ({ date, onExerciseAdded }) => {
             onChange={(e) => setGifUrl(e.target.value)}
             placeholder="https://example.com/exercise.gif"
           />
+          {gifUrl && (
+            <div className="mt-2">
+              <img
+                src={gifUrl}
+                alt="Exercise preview"
+                style={{ maxWidth: "100%", maxHeight: "150px" }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://via.placeholder.com/150?text=Invalid+Image";
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="form-group set-inputs-container">
