@@ -28,7 +28,7 @@ export const exerciseLibrary = [
     id: 5,
     name: "Push-Up",
     gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/47.gif",
-    bodyPart: "chest",
+    bodyPart: "Chest",
   },
   {
     id: 6,
@@ -243,6 +243,36 @@ export const exerciseLibrary = [
     gifUrl:
       "https://fitnessprogramer.com/wp-content/uploads/2021/08/Cable-Rear-Pulldown.gif",
     bodyPart: "Lats",
+  },
+  {
+    id: 40,
+    name: "Dumbbell Shoulder Shrug",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/42.gif",
+    bodyPart: "Traps",
+  },
+  {
+    id: 41,
+    name: "Machine Leg Extension",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/130.gif",
+    bodyPart: "Thighs",
+  },
+  {
+    id: 42,
+    name: "Machine Leg Curl (Prone)",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/160.gif",
+    bodyPart: "Legs",
+  },
+  {
+    id: 43,
+    name: "Machine Leg Press",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/132.gif",
+    bodyPart: "Legs",
+  },
+  {
+    id: 44,
+    name: "Bodyweight Calf Raise",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/1227.gif",
+    bodyPart: "Legs",
   },
 ];
 
