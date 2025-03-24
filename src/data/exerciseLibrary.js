@@ -66,8 +66,7 @@ export const exerciseLibrary = [
   {
     id: 11,
     name: "Seated V-bar Cable Row",
-    gifUrl:
-      "https://musclemagfitness.com/wp-content/uploads/seated-v-bar-cable-row-exercise.gif",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/21.gif",
     bodyPart: "Upper Back",
   },
   {
@@ -273,6 +272,18 @@ export const exerciseLibrary = [
     name: "Bodyweight Calf Raise",
     gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/1227.gif",
     bodyPart: "Legs",
+  },
+  {
+    id: 45,
+    name: "Dumbbell Incline Curl",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/106.gif",
+    bodyPart: "Bicep",
+  },
+  {
+    id: 46,
+    name: "Preacher Curl Machine",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/271.gif",
+    bodyPart: "Bicep",
   },
 ];
 
