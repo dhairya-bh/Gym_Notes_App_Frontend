@@ -238,9 +238,8 @@ export const exerciseLibrary = [
   },
   {
     id: 39,
-    name: "Cable Rear Pulldown",
-    gifUrl:
-      "https://fitnessprogramer.com/wp-content/uploads/2021/08/Cable-Rear-Pulldown.gif",
+    name: "Cable Rear Pulldown (Wide Grip)",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/84.gif",
     bodyPart: "Lats",
   },
   {
@@ -284,6 +283,12 @@ export const exerciseLibrary = [
     name: "Preacher Curl Machine",
     gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/271.gif",
     bodyPart: "Bicep",
+  },
+  {
+    id: 47,
+    name: "Barbell Push Press Behind the Neck",
+    gifUrl: "https://cdn.jefit.com/assets/img/exercises/gifs/439.gif",
+    bodyPart: "Shoulder",
   },
 ];
 

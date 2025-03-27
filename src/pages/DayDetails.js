@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ExerciseForm from "../components/ExerciseForm";
 import ExerciseList from "../components/ExerciseList";
+import ExerciseComparison from "../components/ExerciseComparison";
 import {
   getExercisesByDate,
   updateWorkoutNotes,
@@ -15,6 +16,7 @@ const DayDetails = () => {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [dateObj, setDateObj] = useState(null);
+  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,7 +95,7 @@ const DayDetails = () => {
 
       <h2>{formattedDate}</h2>
 
-      <div className="workout-notes">
+      <div className="workout-notes mb-4">
         <h3>Workout Notes</h3>
         <textarea
           value={notes}
@@ -106,6 +108,21 @@ const DayDetails = () => {
           Save Notes
         </button>
       </div>
+
+      {/* Toggle comparison view button */}
+      <button
+        onClick={() => setShowComparison(!showComparison)}
+        className="btn btn-info mb-3"
+      >
+        {showComparison ? "Hide Comparison" : "Compare with Another Day"}
+      </button>
+
+      {showComparison && (
+        <ExerciseComparison
+          currentDate={dateObj}
+          currentExercises={exercises}
+        />
+      )}
 
       <div className="row">
         <div className="full-width">
